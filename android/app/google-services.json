@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "148235948369",
+    "project_id": "bungry-alarm",
+    "storage_bucket": "bungry-alarm.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:148235948369:android:a94c30d34194a4236c0370",
+        "android_client_info": {
+          "package_name": "com.bungry.a"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9wog-McyIrpg87egkxCcVahpaV0Ne_dg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
