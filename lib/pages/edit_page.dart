@@ -140,7 +140,7 @@ Future<void> _updateData() async {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('알림이 성공적으로 삭제되었습니다.')),
         );
-        Navigator.pop(context); // 삭제 후 페이지를 닫음
+        Navigator.pop(context, true); // 삭제 후 페이지를 닫음
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('알림 삭제에 실패했습니다.')),
@@ -318,8 +318,7 @@ Future<void> _updateData() async {
 
           Positioned(
             top: MediaQuery.of(context).size.height * 0.72, // 화면 높이에 맞춰 위치 조정
-            right: 150,
-            left: 0,
+            left: MediaQuery.of(context).size.width * 0.22, // 화면 너비의 25% 위치에 배치
             child: IconButton(
               onPressed: () {
                 // 버튼 클릭 시 기능
@@ -334,8 +333,7 @@ Future<void> _updateData() async {
 
           Positioned(
             top: MediaQuery.of(context).size.height * 0.72, // 화면 높이에 맞춰 위치 조정
-            right: 0,
-            left: 150,
+            left: MediaQuery.of(context).size.width * 0.65, // 화면 너비의 25% 위치에 배치
             child: IconButton(
               onPressed: () {
                 // 버튼 클릭 시 기능

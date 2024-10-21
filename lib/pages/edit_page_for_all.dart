@@ -467,8 +467,7 @@ class _EditPageState extends State<EditPage> {
 
           Positioned(
             top: MediaQuery.of(context).size.height * 0.72, // 화면 높이에 맞춰 위치 조정
-            right: 150,
-            left: 0,
+            left: MediaQuery.of(context).size.width * 0.22, // 화면 너비의 25% 위치에 배치
             child: IconButton(
               onPressed: () {
                 // 버튼 클릭 시 기능
@@ -483,8 +482,7 @@ class _EditPageState extends State<EditPage> {
 
           Positioned(
             top: MediaQuery.of(context).size.height * 0.72, // 화면 높이에 맞춰 위치 조정
-            right: 0,
-            left: 150,
+            left: MediaQuery.of(context).size.width * 0.65, // 화면 너비의 25% 위치에 배치
             child: IconButton(
               onPressed: () {
                 // 버튼 클릭 시 기능

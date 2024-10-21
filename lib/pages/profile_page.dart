@@ -16,6 +16,7 @@ class _ProfilePageState extends State<ProfilePage> {
   List<dynamic> dummyData = [];
   // 가짜 데이터
   bool isLoading = true; // 데이터를 로드하는 동안 로딩 상태를 표시하기 위한 변수
+  bool isTokenMissing = false; // 토큰이 없을 때를 처리하기 위한 변수
 
   @override
   void initState() {
@@ -36,9 +37,10 @@ class _ProfilePageState extends State<ProfilePage> {
       String? accessToken = await getAccessToken();
 
       if (accessToken == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('토큰이 없습니다. 다시 로그인 해주세요.')),
-        );
+        setState(() {
+          isLoading = false; // 로딩 완료
+          isTokenMissing = true; // 토큰 없음 상태로 설정
+        });
         return;
       }
 
@@ -54,6 +56,7 @@ class _ProfilePageState extends State<ProfilePage> {
         dummyData = response.data;
         _sortDataByDate(); // 데이터를 로드한 후 날짜 내림차순 정렬
         isLoading = false; // 데이터 로드 완료 후 로딩 상태 해제
+        isTokenMissing = false; // 토큰이 있을 경우 false로 설정
       });
     } catch (e) {
       print('Error fetching data: $e');
@@ -77,16 +80,42 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => CreatePage()),
-          );
-          // 알림 생성이 성공하면 서버에서 데이터를 다시 로드
-          if (result == true) {
-            setState(() {
-              isLoading = true; // 로딩 상태로 변경
-            });
-            await loadServerData(); // 서버 데이터 다시 로드
+          if (isTokenMissing) {
+            // 토큰이 없을 때는 팝업을 띄움
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text(
+                    '로그인 필요',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  content: Text(
+                    '계속하려면 로그인 해주세요.',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(); // 팝업 닫기
+                      },
+                      child: Text('확인'),
+                    ),
+                  ],
+                );
+              },
+            );
+          } else {
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => CreatePage()),
+            );
+            // 알림 생성이 성공하면 서버에서 데이터를 다시 로드
+            if (result == true) {
+              setState(() {
+                isLoading = true; // 로딩 상태로 변경
+              });
+              await loadServerData(); // 서버 데이터 다시 로드
+            }
           }
         },
         backgroundColor: Colors.black,
@@ -108,7 +137,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: Text(
                   'My Page',
                   style: TextStyle(
-                      fontSize: 30,
+                      fontSize: 25,
                       color: Colors.black,
                       fontWeight: FontWeight.bold),
                 ),
@@ -118,12 +147,13 @@ class _ProfilePageState extends State<ProfilePage> {
 
           // 테두리
           Positioned(
-            top: 100,
+            top: 90,
             left: 30,
             right: 30,
             child: Container(
               width: 600,
-              height: MediaQuery.of(context).size.height * 0.7, // 화면 높이의 70%로 설정
+              height:
+                  MediaQuery.of(context).size.height * 0.7, // 화면 높이의 70%로 설정
               color: Color.fromARGB(255, 211, 211, 211),
             ),
           ),
@@ -133,10 +163,18 @@ class _ProfilePageState extends State<ProfilePage> {
             Center(
               child: CircularProgressIndicator(),
             )
+          else if (isTokenMissing)
+            // 토큰이 없을 때 "로그인이 필요합니다." 메시지 표시
+            Center(
+              child: Text(
+                '로그인이 필요합니다.',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            )
           else
             // 리스트뷰 추가
             Positioned(
-              top: 110, // 테두리 박스의 안쪽에 위치하도록 조정
+              top: 100, // 테두리 박스의 안쪽에 위치하도록 조정
               left: 40,
               right: 40,
               bottom: 40, // 리스트뷰의 하단 여백
@@ -184,6 +222,21 @@ class _ProfilePageState extends State<ProfilePage> {
                     Divider(), // 각 아이템 사이에 구분선 추가
               ),
             ),
+          // 설정 페이지
+          /* Positioned(
+            top: 20,
+            right: 20,
+            child: IconButton(
+              onPressed: () {
+                // 버튼 클릭 시 기능
+                Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsPage()),);
+              },
+              icon: Icon(
+                Icons.settings,
+                size: 40,
+              ),
+            ),
+          ),*/
         ],
       ),
     );

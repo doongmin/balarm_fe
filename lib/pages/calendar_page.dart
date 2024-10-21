@@ -20,6 +20,7 @@ class _CalendarPageState extends State<CalendarPage> {
   // 날짜별 스케줄 데이터
   Map<DateTime, List<Map<String, dynamic>>> _schedules = {};
   bool isLoading = true; // 데이터를 로드하는 동안 로딩 상태를 표시하기 위한 변수
+  bool isTokenMissing = false; // 토큰이 없을 때를 처리하기 위한 변수
 
   @override
   void initState() {
@@ -41,9 +42,10 @@ class _CalendarPageState extends State<CalendarPage> {
       String? accessToken = await getAccessToken();
 
       if (accessToken == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('토큰이 없습니다. 다시 로그인 해주세요.')),
-        );
+        setState(() {
+          isLoading = false; // 로딩 완료
+          isTokenMissing = true; // 토큰 없음 상태로 설정
+        });
         return;
       }
 
@@ -90,22 +92,25 @@ class _CalendarPageState extends State<CalendarPage> {
             'detail': schedule.containsKey('detail')
                 ? schedule['detail']
                 : '상세 정보 없음', // 상세 정보
-            'id_user': schedule.containsKey('id_user') ? schedule['id_user'] : null, // id_user 추가
+            'id_user': schedule.containsKey('id_user')
+                ? schedule['id_user']
+                : null, // id_user 추가
           });
         });
 
         setState(() {
           _schedules = schedules; // 변환된 데이터를 상태에 저장
           isLoading = false; // 데이터 로드 완료 후 로딩 상태 해제
+          isTokenMissing = false; // 토큰이 있을 경우 false로 설정
         });
       }
     } catch (e) {
       print('Error fetching data: $e');
       if (mounted) {
-      setState(() {
-        isLoading = false; // 오류 발생 시에도 로딩 상태 해제
-      });
-    }
+        setState(() {
+          isLoading = false; // 오류 발생 시에도 로딩 상태 해제
+        });
+      }
     }
   }
 
@@ -132,17 +137,43 @@ class _CalendarPageState extends State<CalendarPage> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          // CreatePage에서 알림 생성 후 결과를 받음
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => CreatePage()),
-          );
-          // 알림 생성이 성공하면 서버에서 데이터를 다시 로드
-          if (result == true) {
-            setState(() {
-              isLoading = true; // 로딩 상태로 변경
-            });
-            await loadServerData(); // 서버 데이터 다시 로드
+          if (isTokenMissing) {
+            // 토큰이 없을 때는 팝업을 띄움
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text(
+                    '로그인 필요',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  content: Text(
+                    '계속하려면 로그인 해주세요.',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(); // 팝업 닫기
+                      },
+                      child: Text('확인'),
+                    ),
+                  ],
+                );
+              },
+            );
+          } else {
+            // CreatePage에서 알림 생성 후 결과를 받음
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => CreatePage()),
+            );
+            // 알림 생성이 성공하면 서버에서 데이터를 다시 로드
+            if (result == true) {
+              setState(() {
+                isLoading = true; // 로딩 상태로 변경
+              });
+              await loadServerData(); // 서버 데이터 다시 로드
+            }
           }
         },
         backgroundColor: Colors.black,
@@ -172,7 +203,6 @@ class _CalendarPageState extends State<CalendarPage> {
                         _selectedDay =
                             _stripTime(selectedDay); // 시간 정보를 제거하여 날짜만 비교
                         _focusedDay = focusedDay;
-                        
                       });
                       loadServerData(); // 선택한 날짜에 대한 알림 로드
                     },
@@ -198,61 +228,73 @@ class _CalendarPageState extends State<CalendarPage> {
 
                   // 선택된 날짜의 스케줄 리스트 표시
                   Expanded(
-                    child: _selectedDaySchedules.isNotEmpty
-                        ? ListView.builder(
-                            itemCount: _selectedDaySchedules.length,
-                            itemBuilder: (context, index) {
-                              // JSON 데이터의 날짜와 시간을 분리
-                              DateTime dateTime = DateTime.parse(
-                                  _selectedDaySchedules[index]['date']);
-                              String title =
-                                  _selectedDaySchedules[index]['title'];
-                              String date = DateFormat('yyyy-MM-dd')
-                                  .format(dateTime); // 날짜 부분
-                              String time =
-                                  DateFormat('HH:mm').format(dateTime); // 시간 부분
-                              String id = _selectedDaySchedules[index]['id'].toString();
-                              String id_user = _selectedDaySchedules[index]['id_user'].toString();
-
-                              // 'detail' 필드가 없는 경우 기본값 설정
-                              String detail = _selectedDaySchedules[index]
-                                      .containsKey('detail')
-                                  ? _selectedDaySchedules[index]['detail']
-                                  : '상세 정보 없음';
-
-                              return ListTile(
-                                title: Text('$time : $title'),
-                                onTap: () async {
-                                  final result = await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => EditPage(
-                                              id: id, // ID 전달
-                                              title: title, // 타이틀 전달
-                                              date: date, // 날짜 전달
-                                              time: time, // 시간 전달
-                                              detail: detail, // 상세 정보 전달
-                                              id_user: id_user,
-                                            )),
-                                  );
-                                  // 알림 수정이 성공하면 서버에서 데이터를 다시 로드
-                                  if (result == true) {
-                                    setState(() {
-                                      isLoading = true; // 로딩 상태로 변경
-                                    });
-                                    await loadServerData(); // 서버 데이터 다시 로드
-                                  }
-                                },
-                              );
-                            },
-                          )
-                        : Center(
+                    child: isTokenMissing
+                        ? Center(
                             child: Text(
-                              '오늘은 일정이 없네요..',
+                              '로그인이 필요합니다.', // 토큰이 없을 때 메시지
                               style: TextStyle(
                                   fontSize: 16, fontWeight: FontWeight.bold),
                             ),
-                          ),
+                          )
+                        : _selectedDaySchedules.isNotEmpty
+                            ? ListView.builder(
+                                itemCount: _selectedDaySchedules.length,
+                                itemBuilder: (context, index) {
+                                  // JSON 데이터의 날짜와 시간을 분리
+                                  DateTime dateTime = DateTime.parse(
+                                      _selectedDaySchedules[index]['date']);
+                                  String title =
+                                      _selectedDaySchedules[index]['title'];
+                                  String date = DateFormat('yyyy-MM-dd')
+                                      .format(dateTime); // 날짜 부분
+                                  String time = DateFormat('HH:mm')
+                                      .format(dateTime); // 시간 부분
+                                  String id = _selectedDaySchedules[index]['id']
+                                      .toString();
+                                  String id_user = _selectedDaySchedules[index]
+                                          ['id_user']
+                                      .toString();
+
+                                  // 'detail' 필드가 없는 경우 기본값 설정
+                                  String detail = _selectedDaySchedules[index]
+                                          .containsKey('detail')
+                                      ? _selectedDaySchedules[index]['detail']
+                                      : '상세 정보 없음';
+
+                                  return ListTile(
+                                    title: Text('$time : $title'),
+                                    onTap: () async {
+                                      final result = await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => EditPage(
+                                                  id: id, // ID 전달
+                                                  title: title, // 타이틀 전달
+                                                  date: date, // 날짜 전달
+                                                  time: time, // 시간 전달
+                                                  detail: detail, // 상세 정보 전달
+                                                  id_user: id_user,
+                                                )),
+                                      );
+                                      // 알림 수정이 성공하면 서버에서 데이터를 다시 로드
+                                      if (result == true) {
+                                        setState(() {
+                                          isLoading = true; // 로딩 상태로 변경
+                                        });
+                                        await loadServerData(); // 서버 데이터 다시 로드
+                                      }
+                                    },
+                                  );
+                                },
+                              )
+                            : Center(
+                                child: Text(
+                                  '오늘은 일정이 없네요..',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
                   ),
                 ],
               ),

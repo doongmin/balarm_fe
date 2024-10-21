@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'signup_page.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:platform/platform.dart';
+
 
 // 로그인 페이지
 class LoginPage extends StatefulWidget {
@@ -18,6 +20,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController passwordController = TextEditingController();
 
   Dio dio = Dio();
+  final Platform platform = LocalPlatform(); // 플랫폼 정보 가져오기
 
 // 토큰을 SharedPreferences에 저장하는 함수
   Future<void> saveTokens(String accessToken, String refreshToken) async {
@@ -49,13 +52,17 @@ class _LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('아이디와 비밀번호를 입력하세요.')),
       );
-    } else {
-      // 로그인 요청을 처리
+      return;
+    } 
+
+    // 기기 유형 확인
+    String deviceType = platform.isIOS ? 'ios' : 'android';
 
       // 서버로 보낼 데이터
       Map<String, dynamic> requestData = {
         "b_id": id,
         "password": password,
+        "device_type": deviceType,
       };
 
       // requestData 출력
@@ -87,7 +94,7 @@ class _LoginPageState extends State<LoginPage> {
           // 성공 시 다음 페이지로 이동 또는 다른 작업
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => MyHomePage()),
+            MaterialPageRoute(builder: (context) => MyHomePage(isLoggedIn: true,)),
           );
         } else if (response.statusCode == 401) {
           showDialog(
@@ -119,7 +126,7 @@ class _LoginPageState extends State<LoginPage> {
         );
       }
     }
-  }
+  
 
   // 저장된 토큰을 불러오는 함수
   Future<Map<String, String?>> getTokens() async {
@@ -152,7 +159,7 @@ class _LoginPageState extends State<LoginPage> {
       appBar: AppBar(
         title: Text('Login'),
       ),
-      body: Padding(
+      body: SingleChildScrollView (
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
