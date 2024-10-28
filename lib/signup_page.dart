@@ -48,7 +48,7 @@ class _SignUpPageState extends State<SignUpPage> {
       };
 
       // requestData 출력
-    print('Request Data: $requestData');
+      print('Request Data: $requestData');
 
       try {
         // POST 요청 보내기
@@ -57,6 +57,9 @@ class _SignUpPageState extends State<SignUpPage> {
           data: requestData,
         );
 
+        // 서버 응답 로그 찍기
+        print('Response Status Code: ${response.statusCode}');
+        print('Response Data: ${response.data}'); // 서버 응답 로그 출력
 
         if (response.statusCode == 201) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -65,16 +68,61 @@ class _SignUpPageState extends State<SignUpPage> {
 
           // 성공 시 다음 페이지로 이동 또는 다른 작업
           // 성공 시 로그인 페이지로 이동
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => LoginPage()), // LoginPage로 수정 필요
-        );
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) => LoginPage()), // LoginPage로 수정 필요
+          );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('회원가입 실패. 다시 시도하세요.')),
+            SnackBar(content: Text('회원가입 실패: ${response.statusMessage}')),
           );
         }
-        
+      } on DioError catch (dioError) {
+        if (dioError.response?.statusCode == 400) {
+          // 서버에서 받은 에러 코드에 따른 처리
+          final errorResponse = dioError.response?.data;
+          if (errorResponse != null && errorResponse['error'] != null) {
+            String errorCode = errorResponse['error'].toString();
+
+            // 에러 코드에 따른 메시지 처리
+            switch (errorCode) {
+              case "0":
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('중복된 아이디가 존재합니다.')),
+                );
+                break;
+              case "1":
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('아이디는 영어, 숫자로만 입력해주세요.')),
+                );
+                break;
+              case "2":
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('비밀번호는 영어, 숫자로만 입력해주세요.')),
+                );
+                break;
+              case "3":
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('비밀번호는 8글자 이상이어야 합니다.')),
+                );
+                break;
+              default:
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('회원가입 실패: 알 수 없는 오류가 발생했습니다.')),
+                );
+                break;
+            }
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('회원가입 실패: ${dioError.message}')),
+            );
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('서버 오류: ${dioError.message}')),
+          );
+        }
       } catch (e) {
         print('Error: $e'); // 오류가 발생한 경우, 콘솔에 출력
         ScaffoldMessenger.of(context).showSnackBar(
@@ -90,7 +138,7 @@ class _SignUpPageState extends State<SignUpPage> {
       appBar: AppBar(
         title: Text('Sign Up'),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [

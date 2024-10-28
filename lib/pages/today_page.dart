@@ -69,9 +69,11 @@ class _TodayPageState extends State<TodayPage> {
       });
     } catch (e) {
       print('Error fetching data: $e');
-      setState(() {
-        isLoading = false; // 에러 발생 시에도 로딩 상태를 종료
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false; // 에러 발생 시에도 로딩 상태를 종료
+        });
+      }
     }
   }
 
@@ -104,11 +106,12 @@ class _TodayPageState extends State<TodayPage> {
               context: context,
               builder: (BuildContext context) {
                 return AlertDialog(
-                  title: Text('로그인 필요',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  title: Text(
+                    '로그인 필요',
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  content: Text('계속하려면 로그인 해주세요.',
-                  
+                  content: Text(
+                    '계속하려면 로그인 해주세요.',
                   ),
                   actions: [
                     TextButton(
@@ -147,7 +150,7 @@ class _TodayPageState extends State<TodayPage> {
         children: [
           // 상단 날짜 텍스트 (매일 당일 날짜 정보 받아와야 함)
           Positioned(
-            top: 30,
+            top: 20,
             left: 50,
             right: 50,
             child: Container(
@@ -165,90 +168,100 @@ class _TodayPageState extends State<TodayPage> {
 
           // 테두리
           Positioned(
-            top: 90,
+            top: 80,
             left: 30,
             right: 30,
             child: Container(
               width: 600,
               height:
-                  MediaQuery.of(context).size.height * 0.7, // 화면 높이의 70%로 설정
-              color: Color.fromARGB(255, 211, 211, 211),
-            ),
-          ),
-
-          // 리스트뷰 추가
-          Positioned(
-            top: 100,
-            left: 40,
-            right: 40,
-            bottom: 40,
-            child: isLoading
-                ? Center(
-                    child: CircularProgressIndicator(), // 로딩 중일 때 표시할 로딩 인디케이터
-                  )
-                : isTokenMissing
+                  MediaQuery.of(context).size.height * 0.63, // 화면 높이의 70%로 설정
+              decoration: BoxDecoration(
+                color: Colors.transparent, // 내부를 투명하게 설정
+                border: Border.all(
+                  color: Colors.black, // 테두리 색상 설정
+                  width: 2.0, // 테두리 두께 설정
+                ),
+                borderRadius: BorderRadius.circular(20.0), // 둥근 네모 모양으로 테두리 설정
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(10.0), // 테두리와 콘텐츠 사이 여백
+                child: isLoading
                     ? Center(
-                        child: Text(
-                          '로그인이 필요합니다.', // 토큰이 없을 때 표시할 메시지
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
+                        child:
+                            CircularProgressIndicator(), // 로딩 중일 때 로딩 인디케이터 표시
                       )
-                    : todayTasks.isNotEmpty
-                        ? ListView.separated(
-                            itemCount: todayTasks.length,
-                            itemBuilder: (context, index) {
-                              DateTime taskDateTime =
-                                  DateTime.parse(todayTasks[index]['date']);
-                              String date = DateFormat('yyyy-MM-dd')
-                                  .format(taskDateTime); // 날짜 부분
-                              String taskTime = DateFormat('HH:mm')
-                                  .format(taskDateTime); // 시간만 추출
-                              String title = todayTasks[index]['title'];
-                              String detail =
-                                  todayTasks[index].containsKey('detail')
-                                      ? todayTasks[index]['detail']
-                                      : '상세 정보 없음'; // detail 정보가 없는 경우
-                              String id = todayTasks[index]['id'].toString();
-                              String id_user =
-                                  todayTasks[index]['id_user'].toString();
-
-                              return ListTile(
-                                leading: Icon(Icons.push_pin_outlined),
-                                title: Text(todayTasks[index]['title'] ?? ''),
-                                subtitle: Text(taskTime),
-                                onTap: () async {
-                                  final result = await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => EditPage(
-                                              id: id, // ID 전달
-                                              title: title, // 타이틀 전달
-                                              date: date, // 날짜 전달
-                                              time: taskTime, // 시간 전달
-                                              detail: detail, // 상세 정보 전달
-                                              id_user: id_user,
-                                            )),
-                                  );
-                                  // 알림 수정이 성공하면 서버에서 데이터를 다시 로드
-                                  if (result == true) {
-                                    setState(() {
-                                      isLoading = true; // 로딩 상태로 변경
-                                    });
-                                    await fetchScheduleData(); // 서버 데이터 다시 로드
-                                  }
-                                },
-                              );
-                            },
-                            separatorBuilder: (context, index) => Divider(),
-                          )
-                        : Center(
+                    : isTokenMissing
+                        ? Center(
                             child: Text(
-                              '오늘은 일정이 없네요..', // 데이터가 없을 때 표시
+                              '로그인이 필요합니다.',
                               style: TextStyle(
                                   fontSize: 16, fontWeight: FontWeight.bold),
                             ),
-                          ),
+                          )
+                        : todayTasks.isNotEmpty
+                            ? ListView.separated(
+                                shrinkWrap: true, // 콘텐츠에 맞게 리스트뷰 크기를 조정
+                                itemCount: todayTasks.length,
+                                itemBuilder: (context, index) {
+                                  DateTime taskDateTime =
+                                      DateTime.parse(todayTasks[index]['date']);
+                                  String date = DateFormat('yyyy-MM-dd')
+                                      .format(taskDateTime); // 날짜 부분
+                                  String taskTime = DateFormat('HH:mm')
+                                      .format(taskDateTime); // 시간만 추출
+                                  String title = todayTasks[index]['title'];
+                                  String detail =
+                                      todayTasks[index].containsKey('detail')
+                                          ? todayTasks[index]['detail']
+                                          : '상세 정보 없음'; // detail 정보가 없는 경우
+                                  String id =
+                                      todayTasks[index]['id'].toString();
+                                  String id_user =
+                                      todayTasks[index]['id_user'].toString();
+
+                                  return ListTile(
+                                    leading: Icon(
+                                      Icons.push_pin_outlined,
+                                      size: 20,
+                                    ),
+                                    title: Text(title), // 제목 출력
+                                    subtitle: Text(taskTime), // 시간 출력
+                                    onTap: () async {
+                                      final result = await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => EditPage(
+                                                  id: id, // ID 전달
+                                                  title: title, // 타이틀 전달
+                                                  date: date, // 날짜 전달
+                                                  time: taskTime, // 시간 전달
+                                                  detail: detail, // 상세 정보 전달
+                                                  id_user: id_user,
+                                                )),
+                                      );
+                                      // 알림 수정이 성공하면 서버에서 데이터를 다시 로드
+                                      if (result == true) {
+                                        setState(() {
+                                          isLoading = true; // 로딩 상태로 변경
+                                        });
+                                        await fetchScheduleData(); // 서버 데이터 다시 로드
+                                      }
+                                    },
+                                  );
+                                },
+                                separatorBuilder: (context, index) =>
+                                    Divider(), // 각 아이템 사이에 구분선 추가
+                              )
+                            : Center(
+                                child: Text(
+                                  '오늘은 일정이 없네요..', // 데이터가 없을 때 표시할 메시지
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+              ),
+            ),
           ),
         ],
       ),

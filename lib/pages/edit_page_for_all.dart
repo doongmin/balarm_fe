@@ -53,7 +53,7 @@ class _EditPageState extends State<EditPage> {
 
     print('User ID: $user_id');
     print('ID User: ${widget.id_user}');
-  
+
     // user_id가 id_user와 일치하는지 확인
     if (user_id != null && user_id.toString() == widget.id_user) {
       setState(() {
@@ -347,8 +347,16 @@ class _EditPageState extends State<EditPage> {
             right: 30,
             child: Container(
               width: 600,
-              height: MediaQuery.of(context).size.height * 0.75, // 화면 높이의 70%로 설정
-              color: Color.fromARGB(255, 182, 182, 182),
+              height:
+                  MediaQuery.of(context).size.height * 0.75, // 화면 높이의 70%로 설정
+              decoration: BoxDecoration(
+                color: Colors.transparent, // 내부를 투명하게 설정
+                border: Border.all(
+                  color: Colors.black, // 테두리 색상 설정
+                  width: 2.0, // 테두리 두께 설정
+                ),
+                borderRadius: BorderRadius.circular(20.0), // 둥근 네모 모양으로 테두리 설정
+              ),
             ),
           ),
 
@@ -360,7 +368,15 @@ class _EditPageState extends State<EditPage> {
             child: Container(
                 width: 600,
                 height: 50,
-                color: Color.fromARGB(255, 235, 226, 225),
+                decoration: BoxDecoration(
+                  color: Colors.transparent, // 내부를 투명하게 설정
+                  border: Border.all(
+                    color: Colors.black, // 테두리 색상 설정
+                    width: 1.0, // 테두리 두께 설정
+                  ),
+                  borderRadius:
+                      BorderRadius.circular(20.0), // 둥근 네모 모양으로 테두리 설정
+                ),
                 child: TextField(
                   controller: titleController,
                   enabled: hasPermission, // 권한 여부에 따라 활성화/비활성화
@@ -385,14 +401,21 @@ class _EditPageState extends State<EditPage> {
             child: Container(
               width: 600,
               height: 50,
-              color: Color.fromARGB(255, 235, 226, 225),
               child: Row(
                 children: [
                   // 날짜 입력 칸
                   Expanded(
                     flex: 1,
                     child: Container(
-                      padding: EdgeInsets.only(right: 5),
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.transparent, // 내부를 투명하게 설정
+                        border: Border.all(
+                          color: Colors.black, // 테두리 색상 설정
+                          width: 1.0, // 테두리 두께 설정
+                        ),
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
                       child: TextField(
                         controller: dateController,
                         enabled: hasPermission, // 권한 여부에 따라 활성화/비활성화
@@ -410,11 +433,23 @@ class _EditPageState extends State<EditPage> {
                     ),
                   ),
 
+                  SizedBox(
+                    width: 10,
+                  ),
+
                   // 시간 입력 칸
                   Expanded(
                     flex: 1,
                     child: Container(
-                      padding: EdgeInsets.only(left: 5),
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.transparent, // 내부를 투명하게 설정
+                        border: Border.all(
+                          color: Colors.black, // 테두리 색상 설정
+                          width: 1.0, // 테두리 두께 설정
+                        ),
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
                       child: TextField(
                         controller: timeController,
                         enabled: hasPermission, // 권한 여부에 따라 활성화/비활성화
@@ -443,8 +478,16 @@ class _EditPageState extends State<EditPage> {
             right: 50,
             child: Container(
               width: 600,
-              height: MediaQuery.of(context).size.height * 0.5, // 화면 높이의 70%로 설정
-              color: Color.fromARGB(255, 235, 226, 225),
+              height:
+                  MediaQuery.of(context).size.height * 0.5, // 화면 높이의 70%로 설정
+              decoration: BoxDecoration(
+                color: Colors.transparent, // 내부를 투명하게 설정
+                border: Border.all(
+                  color: Colors.black, // 테두리 색상 설정
+                  width: 1.0, // 테두리 두께 설정
+                ),
+                borderRadius: BorderRadius.circular(20.0), // 둥근 네모 모양으로 테두리 설정
+              ),
               child: TextField(
                 controller: detailController,
                 enabled: hasPermission, // 권한 여부에 따라 활성화/비활성화

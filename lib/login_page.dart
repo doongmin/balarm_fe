@@ -42,6 +42,15 @@ class _LoginPageState extends State<LoginPage> {
     print('User ID: $userId');
   }
 
+  // nickname 저장하는 함수
+  Future<void> saveNickname(String nickname) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_nickname', nickname);
+
+    // 저장된 nickname 출력 (테스트용)
+    print('nickname: $nickname');
+  }
+
   // 로그인 함수 (추후 서버와 연동할 때 사용할 수 있음)
   Future<void> _login() async {
     String id = idController.text;
@@ -83,18 +92,21 @@ class _LoginPageState extends State<LoginPage> {
           String accessToken = data['access'];
           String refreshToken = data['refresh'];
           int userId = data['user_id'];
+          String nickname = data['user_nickname'];
 
           await saveUserId(userId); // user_id 저장
           await saveTokens(accessToken, refreshToken); // 토큰 저장
+          await saveNickname(nickname);
 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('로그인 성공!')),
           );
 
           // 성공 시 다음 페이지로 이동 또는 다른 작업
-          Navigator.pushReplacement(
+          Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => MyHomePage(isLoggedIn: true,)),
+            (Route<dynamic> route) => false,
           );
         } else if (response.statusCode == 401) {
           showDialog(

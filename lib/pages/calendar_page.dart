@@ -230,69 +230,115 @@ class _CalendarPageState extends State<CalendarPage> {
                   Expanded(
                     child: isTokenMissing
                         ? Center(
-                            child: Text(
-                              '로그인이 필요합니다.', // 토큰이 없을 때 메시지
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            child: Container(
+                            width: double.infinity, // 가로를 부모 위젯에 맞춤
+                            height: MediaQuery.of(context).size.height *
+                                0.7, // 화면 높이의 70%로 설정
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Colors.black, // 테두리 색상
+                                width: 1.0, // 테두리 두께
+                              ),
+                              borderRadius:
+                                  BorderRadius.circular(10), // 테두리 둥글게
                             ),
-                          )
+                            padding: EdgeInsets.all(8), // 내용과 테두리 사이 간격
+                            child: Center(
+                                    child: Text(
+                                      '로그인이 필요합니다.',
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                          ))
                         : _selectedDaySchedules.isNotEmpty
-                            ? ListView.builder(
-                                itemCount: _selectedDaySchedules.length,
-                                itemBuilder: (context, index) {
-                                  // JSON 데이터의 날짜와 시간을 분리
-                                  DateTime dateTime = DateTime.parse(
-                                      _selectedDaySchedules[index]['date']);
-                                  String title =
-                                      _selectedDaySchedules[index]['title'];
-                                  String date = DateFormat('yyyy-MM-dd')
-                                      .format(dateTime); // 날짜 부분
-                                  String time = DateFormat('HH:mm')
-                                      .format(dateTime); // 시간 부분
-                                  String id = _selectedDaySchedules[index]['id']
-                                      .toString();
-                                  String id_user = _selectedDaySchedules[index]
-                                          ['id_user']
-                                      .toString();
+                            ? Container(
+                                width: double.infinity, // 가로를 부모 위젯에 맞춤
+                                height: MediaQuery.of(context).size.height *
+                                    0.7, // 화면 높이의 70%로 설정
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: Colors.black, // 테두리 색상
+                                    width: 2.0, // 테두리 두께
+                                  ),
+                                  borderRadius:
+                                      BorderRadius.circular(10), // 테두리 둥글게
+                                ),
+                                child: ListView.builder(
+                                  itemCount: _selectedDaySchedules.length,
+                                  itemBuilder: (context, index) {
+                                    // JSON 데이터의 날짜와 시간을 분리
+                                    DateTime dateTime = DateTime.parse(
+                                        _selectedDaySchedules[index]['date']);
+                                    String title =
+                                        _selectedDaySchedules[index]['title'];
+                                    String date = DateFormat('yyyy-MM-dd')
+                                        .format(dateTime); // 날짜 부분
+                                    String time = DateFormat('HH:mm')
+                                        .format(dateTime); // 시간 부분
+                                    String id = _selectedDaySchedules[index]
+                                            ['id']
+                                        .toString();
+                                    String id_user =
+                                        _selectedDaySchedules[index]['id_user']
+                                            .toString();
 
-                                  // 'detail' 필드가 없는 경우 기본값 설정
-                                  String detail = _selectedDaySchedules[index]
-                                          .containsKey('detail')
-                                      ? _selectedDaySchedules[index]['detail']
-                                      : '상세 정보 없음';
+                                    // 'detail' 필드가 없는 경우 기본값 설정
+                                    String detail = _selectedDaySchedules[index]
+                                            .containsKey('detail')
+                                        ? _selectedDaySchedules[index]['detail']
+                                        : '상세 정보 없음';
 
-                                  return ListTile(
-                                    title: Text('$time : $title'),
-                                    onTap: () async {
-                                      final result = await Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => EditPage(
-                                                  id: id, // ID 전달
-                                                  title: title, // 타이틀 전달
-                                                  date: date, // 날짜 전달
-                                                  time: time, // 시간 전달
-                                                  detail: detail, // 상세 정보 전달
-                                                  id_user: id_user,
-                                                )),
-                                      );
-                                      // 알림 수정이 성공하면 서버에서 데이터를 다시 로드
-                                      if (result == true) {
-                                        setState(() {
-                                          isLoading = true; // 로딩 상태로 변경
-                                        });
-                                        await loadServerData(); // 서버 데이터 다시 로드
-                                      }
-                                    },
-                                  );
-                                },
-                              )
+                                    return ListTile(
+                                      leading: Icon(Icons.circle, size: 10,),
+                                      title: Text('$time : $title'),
+                                      onTap: () async {
+                                        final result = await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => EditPage(
+                                                    id: id, // ID 전달
+                                                    title: title, // 타이틀 전달
+                                                    date: date, // 날짜 전달
+                                                    time: time, // 시간 전달
+                                                    detail: detail, // 상세 정보 전달
+                                                    id_user: id_user,
+                                                  )),
+                                        );
+                                        // 알림 수정이 성공하면 서버에서 데이터를 다시 로드
+                                        if (result == true) {
+                                          setState(() {
+                                            isLoading = true; // 로딩 상태로 변경
+                                          });
+                                          await loadServerData(); // 서버 데이터 다시 로드
+                                        }
+                                      },
+                                    );
+                                  },
+                                ))
                             : Center(
-                                child: Text(
-                                  '오늘은 일정이 없네요..',
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold),
+                                child: Container(
+                                  width: double.infinity, // 가로를 부모 위젯에 맞춤
+                                  height: MediaQuery.of(context).size.height *
+                                      0.7, // 화면 높이의 70%로 설정
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: Colors.black, // 테두리 색상
+                                      width: 2.0, // 테두리 두께
+                                    ),
+                                    borderRadius:
+                                        BorderRadius.circular(10), // 테두리 둥글게
+                                  ),
+                                  padding: EdgeInsets.all(8),
+                                  child: Center(
+                                    child: Text(
+                                      '이 날은 일정이 없네요..',
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
                                 ),
                               ),
                   ),

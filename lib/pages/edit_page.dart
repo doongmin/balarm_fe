@@ -48,28 +48,29 @@ class _EditPageState extends State<EditPage> {
   }
 
   // 알림 수정 함수 (PUT 요청)
-Future<void> _updateData() async {
-  String title = titleController.text;
-  String date = dateController.text;
-  String time = timeController.text;
-  String detail = detailController.text;
+  Future<void> _updateData() async {
+    String title = titleController.text;
+    String date = dateController.text;
+    String time = timeController.text;
+    String detail = detailController.text;
 
-  if (title.isEmpty || date.isEmpty || time.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('모든 항목을 입력해주세요')),
-    );
-    return;
-  }
+    if (title.isEmpty || date.isEmpty || time.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('모든 항목을 입력해주세요')),
+      );
+      return;
+    }
 
 // 날짜와 시간을 결합해서 DateTime 형식으로 변환
-  String combinedDateTimeString = '$date $time';
-  DateTime combinedDateTime = DateFormat('yyyy-MM-dd HH:mm').parse(combinedDateTimeString);
+    String combinedDateTimeString = '$date $time';
+    DateTime combinedDateTime =
+        DateFormat('yyyy-MM-dd HH:mm').parse(combinedDateTimeString);
 
-  // ISO 8601 형식 (2024-09-20T10:00:00)으로 변환
-  String formattedDateTime = combinedDateTime.toIso8601String();
+    // ISO 8601 형식 (2024-09-20T10:00:00)으로 변환
+    String formattedDateTime = combinedDateTime.toIso8601String();
 
-  try {
-    // SharedPreferences에서 저장된 액세스 토큰을 가져옴
+    try {
+      // SharedPreferences에서 저장된 액세스 토큰을 가져옴
       String? accessToken = await getAccessToken();
 
       if (accessToken == null) {
@@ -79,39 +80,39 @@ Future<void> _updateData() async {
         return;
       }
 
-    // 수정된 데이터를 서버로 전송 (PUT 요청)
-    var response = await Dio().patch(
-      'https://port-0-balarm-m1ep4ac2e3fbce39.sel4.cloudtype.app/api/alarms/${widget.id}/', // 기존 타이틀로 아이템 식별 (필요시 ID 사용)
-      data: {
-        'title': title,
-        'date': formattedDateTime,
-        'detail': detail,
-      },
-      options: Options(
+      // 수정된 데이터를 서버로 전송 (PUT 요청)
+      var response = await Dio().patch(
+        'https://port-0-balarm-m1ep4ac2e3fbce39.sel4.cloudtype.app/api/alarms/${widget.id}/', // 기존 타이틀로 아이템 식별 (필요시 ID 사용)
+        data: {
+          'title': title,
+          'date': formattedDateTime,
+          'detail': detail,
+        },
+        options: Options(
           headers: {
             'Authorization': 'Bearer $accessToken', // 헤더에 토큰 추가
           },
         ),
-    );
-
-    if (response.statusCode == 200) {
-      // 성공적으로 수정됨
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('알림이 성공적으로 수정되었습니다.')),
       );
-      Navigator.pop(context, true); // 수정 후 페이지를 닫음, true값 전달 -> 바로 새로고침용
-    } else {
+
+      if (response.statusCode == 200) {
+        // 성공적으로 수정됨
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('알림이 성공적으로 수정되었습니다.')),
+        );
+        Navigator.pop(context, true); // 수정 후 페이지를 닫음, true값 전달 -> 바로 새로고침용
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('알림 수정에 실패했습니다.')),
+        );
+      }
+    } catch (e) {
+      print('Error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('알림 수정에 실패했습니다.')),
+        SnackBar(content: Text('서버와의 연결에 실패했습니다.')),
       );
     }
-  } catch (e) {
-    print('Error: $e');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('서버와의 연결에 실패했습니다.')),
-    );
   }
-}
 
   // 서버에 데이터를 삭제하는 함수 (DELETE 요청)
   Future<void> _deleteData() async {
@@ -128,7 +129,7 @@ Future<void> _updateData() async {
 
       var response = await Dio().delete(
         'https://port-0-balarm-m1ep4ac2e3fbce39.sel4.cloudtype.app/api/alarms/${widget.id}/', // 타이틀로 아이템 식별 (필요시 ID 사용)
-      options: Options(
+        options: Options(
           headers: {
             'Authorization': 'Bearer $accessToken', // 헤더에 토큰 추가
           },
@@ -207,8 +208,16 @@ Future<void> _updateData() async {
             right: 30,
             child: Container(
               width: 600,
-              height: MediaQuery.of(context).size.height * 0.75, // 화면 높이의 70%로 설정
-              color: Color.fromARGB(255, 182, 182, 182),
+              height:
+                  MediaQuery.of(context).size.height * 0.75, // 화면 높이의 70%로 설정
+              decoration: BoxDecoration(
+                color: Colors.transparent, // 내부를 투명하게 설정
+                border: Border.all(
+                  color: Colors.black, // 테두리 색상 설정
+                  width: 2.0, // 테두리 두께 설정
+                ),
+                borderRadius: BorderRadius.circular(20.0), // 둥근 네모 모양으로 테두리 설정
+              ),
             ),
           ),
 
@@ -220,7 +229,15 @@ Future<void> _updateData() async {
             child: Container(
                 width: 600,
                 height: 50,
-                color: Color.fromARGB(255, 235, 226, 225),
+                decoration: BoxDecoration(
+                  color: Colors.transparent, // 내부를 투명하게 설정
+                  border: Border.all(
+                    color: Colors.black, // 테두리 색상 설정
+                    width: 1.0, // 테두리 두께 설정
+                  ),
+                  borderRadius:
+                      BorderRadius.circular(20.0), // 둥근 네모 모양으로 테두리 설정
+                ),
                 child: TextField(
                   controller: titleController,
                   decoration: InputDecoration(
@@ -239,14 +256,22 @@ Future<void> _updateData() async {
             child: Container(
               width: 600,
               height: 50,
-              color: Color.fromARGB(255, 235, 226, 225),
+              
               child: Row(
                 children: [
                   // 날짜 입력 칸
                   Expanded(
                     flex: 1,
                     child: Container(
-                      padding: EdgeInsets.only(right: 5),
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.transparent, // 내부를 투명하게 설정
+                        border: Border.all(
+                          color: Colors.black, // 테두리 색상 설정
+                          width: 1.0, // 테두리 두께 설정
+                        ),
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
                       child: TextField(
                         controller: dateController,
                         readOnly: true,
@@ -263,11 +288,23 @@ Future<void> _updateData() async {
                     ),
                   ),
 
+                  SizedBox(
+                    width: 10,
+                  ),
+
                   // 시간 입력 칸
                   Expanded(
                     flex: 1,
                     child: Container(
-                      padding: EdgeInsets.only(left: 5),
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.transparent, // 내부를 투명하게 설정
+                        border: Border.all(
+                          color: Colors.black, // 테두리 색상 설정
+                          width: 1.0, // 테두리 두께 설정
+                        ),
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
                       child: TextField(
                         controller: timeController,
                         readOnly: true,
@@ -295,8 +332,16 @@ Future<void> _updateData() async {
             right: 50,
             child: Container(
               width: 600,
-              height: MediaQuery.of(context).size.height * 0.5, // 화면 높이의 70%로 설정
-              color: Color.fromARGB(255, 235, 226, 225),
+              height:
+                  MediaQuery.of(context).size.height * 0.5, // 화면 높이의 70%로 설정
+              decoration: BoxDecoration(
+                color: Colors.transparent, // 내부를 투명하게 설정
+                border: Border.all(
+                  color: Colors.black, // 테두리 색상 설정
+                  width: 1.0, // 테두리 두께 설정
+                ),
+                borderRadius: BorderRadius.circular(20.0), // 둥근 네모 모양으로 테두리 설정
+              ),
               child: TextField(
                 controller: detailController,
                 maxLines: null, // 여러 줄 입력 가능

@@ -27,7 +27,6 @@ class _CreatePageState extends State<CreatePage> {
     detailController = TextEditingController();
   }
 
-
 // 토큰 가져오기
   Future<String?> getAccessToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -87,7 +86,6 @@ class _CreatePageState extends State<CreatePage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('알림이 성공적으로 추가되었습니다.')),
         );
-
 
         Navigator.pop(context, true); // 저장 후 페이지를 닫음, true값 전달 -> 바로 새로고침용
       } else {
@@ -159,8 +157,16 @@ class _CreatePageState extends State<CreatePage> {
             right: 30,
             child: Container(
               width: 600,
-              height: MediaQuery.of(context).size.height * 0.75, // 화면 높이의 70%로 설정
-              color: Color.fromARGB(255, 182, 182, 182),
+              height:
+                  MediaQuery.of(context).size.height * 0.75, // 화면 높이의 70%로 설정
+              decoration: BoxDecoration(
+                color: Colors.transparent, // 내부를 투명하게 설정
+                border: Border.all(
+                  color: Colors.black, // 테두리 색상 설정
+                  width: 2.0, // 테두리 두께 설정
+                ),
+                borderRadius: BorderRadius.circular(20.0), // 둥근 네모 모양으로 테두리 설정
+              ),
             ),
           ),
 
@@ -172,7 +178,15 @@ class _CreatePageState extends State<CreatePage> {
             child: Container(
                 width: 600,
                 height: 50,
-                color: Color.fromARGB(255, 235, 226, 225),
+                decoration: BoxDecoration(
+                  color: Colors.transparent, // 내부를 투명하게 설정
+                  border: Border.all(
+                    color: Colors.black, // 테두리 색상 설정
+                    width: 1.0, // 테두리 두께 설정
+                  ),
+                  borderRadius:
+                      BorderRadius.circular(20.0), // 둥근 네모 모양으로 테두리 설정
+                ),
                 child: TextField(
                   controller: titleController,
                   decoration: InputDecoration(
@@ -191,14 +205,21 @@ class _CreatePageState extends State<CreatePage> {
             child: Container(
               width: 600,
               height: 50,
-              color: Color.fromARGB(255, 235, 226, 225),
               child: Row(
                 children: [
                   // 날짜 입력 칸
                   Expanded(
                     flex: 1,
                     child: Container(
-                      padding: EdgeInsets.only(right: 5),
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.transparent, // 내부를 투명하게 설정
+                        border: Border.all(
+                          color: Colors.black, // 테두리 색상 설정
+                          width: 1.0, // 테두리 두께 설정
+                        ),
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
                       child: TextField(
                         controller: dateController,
                         readOnly: true,
@@ -215,11 +236,21 @@ class _CreatePageState extends State<CreatePage> {
                     ),
                   ),
 
+                  SizedBox(width: 10,),
+
                   // 시간 입력 칸
                   Expanded(
                     flex: 1,
                     child: Container(
-                      padding: EdgeInsets.only(left: 5),
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.transparent, // 내부를 투명하게 설정
+                        border: Border.all(
+                          color: Colors.black, // 테두리 색상 설정
+                          width: 1.0, // 테두리 두께 설정
+                        ),
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
                       child: TextField(
                         controller: timeController,
                         readOnly: true,
@@ -247,8 +278,16 @@ class _CreatePageState extends State<CreatePage> {
             right: 50,
             child: Container(
               width: 600,
-              height: MediaQuery.of(context).size.height * 0.5, // 화면 높이의 70%로 설정
-              color: Color.fromARGB(255, 235, 226, 225),
+              height:
+                  MediaQuery.of(context).size.height * 0.5, // 화면 높이의 70%로 설정
+              decoration: BoxDecoration(
+                color: Colors.transparent, // 내부를 투명하게 설정
+                border: Border.all(
+                  color: Colors.black, // 테두리 색상 설정
+                  width: 1.0, // 테두리 두께 설정
+                ),
+                borderRadius: BorderRadius.circular(20.0), // 둥근 네모 모양으로 테두리 설정
+              ),
               child: TextField(
                 controller: detailController,
                 maxLines: null, // 여러 줄 입력 가능
